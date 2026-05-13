@@ -6,14 +6,12 @@ export const useAuth = create((set) => ({
   loading: false,
   isAuthenticated: false,
   error: null,
-  login: async (userCredWithRole) => {
-    const { role, ...userCredObj } = userCredWithRole;
+  login: async (userCredObj) => {
     try {
       //set loading true
       set({ loading: true, error: null });
       //make api call
       let res = await axios.post("http://localhost:4000/common-api/login", userCredObj, { withCredentials: true });
-      // console.log("res is ", res);
       //update state
       set({
         loading: false,
@@ -21,7 +19,6 @@ export const useAuth = create((set) => ({
         currentUser: res.data.payload, //{message:"",payload:}
       });
     } catch (err) {
-      console.log("err is ", err);
       set({
         loading: false,
         isAuthenticated: false,
@@ -58,14 +55,14 @@ export const useAuth = create((set) => ({
       const res = await axios.get("http://localhost:4000/common-api/check-auth", { withCredentials: true });
 
       set({
-        user: res.data.payload,
+        currentUser: res.data.payload,
         isAuthenticated: true,
       });
     } catch (err) {
       // If user is not logged in → do nothing
       if (err.response?.status === 401) {
         set({
-          user: null,
+          currentUser: null,
           isAuthenticated: false,
         });
         return;

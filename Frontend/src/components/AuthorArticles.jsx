@@ -12,36 +12,38 @@ import {
   loadingClass,
   errorClass,
   emptyStateClass,
+  pageTitleClass,
+  bodyText,
 } from "../styles/common";
 
 function AuthorArticles() {
   const navigate = useNavigate();
   const user = useAuth((state) => state.currentUser);
+  const authorId = user?._id || user?.userId;
 
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!authorId) return;
 
     const getAuthorArticles = async () => {
       setLoading(true);
 
       try {
-        const res = await axios.get(`http://localhost:4000/author-api/articles/${user._id}`, { withCredentials: true });
+        const res = await axios.get(`http://localhost:4000/author-api/articles/${authorId}`, { withCredentials: true });
 
-        setArticles(res.data.payload);
+        setArticles(res.data.payload.filter((article) => article.isArticleActive !== false));
       } catch (err) {
-        console.log(err);
-        setError(err.response?.data?.error || "Failed to fetch articles");
+        setError(err.response?.data?.error || err.response?.data?.message || "Failed to fetch articles");
       } finally {
         setLoading(false);
       }
     };
 
     getAuthorArticles();
-  }, [user]);
+  }, [authorId]);
 
   const openArticle = (article) => {
     navigate(`/article/${article._id}`, {
@@ -60,28 +62,32 @@ function AuthorArticles() {
   if (error) return <p className={errorClass}>{error}</p>;
 
   if (articles.length === 0) {
-    return <div className={emptyStateClass}>You haven't published any articles yet.</div>;
+    return <div className={emptyStateClass}>You haven't published any active articles yet.</div>;
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {articles.map((article) => (
-        <div key={article._id} className={`${articleCardClass} flex flex-col`}>
-          <div className="flex flex-col gap-2">
-            <p className={articleMeta}>{article.category}</p>
+    <div>
+      <div className="mb-6">
+        <h1 className={pageTitleClass}>Your Articles</h1>
+        <p className={`${bodyText} mt-2`}>Review, edit, and manage your published articles.</p>
+      </div>
 
-            <p className={articleTitle}>{article.title}</p>
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {articles.map((article) => (
+          <div key={article._id} className={articleCardClass}>
+            <div className="flex flex-col gap-3">
+              <p className={articleMeta}>{article.category}</p>
+              <p className={articleTitle}>{article.title}</p>
+              <p className={articleExcerpt}>{article.content.slice(0, 120)}...</p>
+              <p className="text-xs text-[#6f7a8e]">{formatDate(article.createdAt)}</p>
+            </div>
 
-            <p className={articleExcerpt}>{article.content.slice(0, 60)}...</p>
-
-            <p className={articleMeta}>{formatDate(article.createdAt)}</p>
+            <button className={`${ghostBtn} mt-auto pt-4`} onClick={() => openArticle(article)}>
+              Read Article
+            </button>
           </div>
-
-          <button className={`${ghostBtn} mt-auto pt-4`} onClick={() => openArticle(article)}>
-            Read Article →
-          </button>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

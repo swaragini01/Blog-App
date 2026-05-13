@@ -13,13 +13,15 @@ import {
   submitBtn,
   errorClass,
   loadingClass,
+  pageWrapper,
 } from "../styles/common";
 import { useAuth } from "../stores/authStore";
 
 function WriteArticle() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const currentUser=useAuth(state=>state.currentUser)
+  const currentUser = useAuth((state) => state.currentUser);
+  const currentUserId = currentUser?._id || currentUser?.userId;
 
   const {
     register,
@@ -31,8 +33,13 @@ function WriteArticle() {
   const submitArticle = async (articleObj) => {
     setLoading(true);
 
-    //add authorId to articleObj
-    articleObj.author=currentUser._id;
+    if (!currentUserId) {
+      toast.error("Please login again before publishing");
+      setLoading(false);
+      return;
+    }
+
+    articleObj.author = currentUserId;
     try {
       await axios.post(
         "http://localhost:4000/author-api/articles",
@@ -54,10 +61,11 @@ function WriteArticle() {
   };
 
   return (
-    <div className={formCard}>
-      <h2 className={formTitle}>Write New Article</h2>
+    <div className={pageWrapper}>
+      <div className={formCard}>
+        <h2 className={formTitle}>Write New Article</h2>
 
-      <form onSubmit={handleSubmit(submitArticle)}>
+        <form onSubmit={handleSubmit(submitArticle)}>
 
         {/* Title */}
         <div className={formGroup}>
@@ -133,7 +141,8 @@ function WriteArticle() {
         {loading && (
           <p className={loadingClass}>Publishing article...</p>
         )}
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

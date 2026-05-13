@@ -1,7 +1,6 @@
 import { NavLink, Outlet } from "react-router";
 import {
   pageWrapper,
-  navLinksClass,
   navLinkClass,
   navLinkActiveClass,
   divider,
@@ -10,10 +9,7 @@ import {
 function AuthorProfile() {
   return (
     <div className={pageWrapper}>
-      
-      {/* Author Navigation */}
-      <div className="flex gap-6 mb-6">
-
+      <div className="mb-6 flex flex-wrap gap-2">
         <NavLink
           to="articles"
           className={({ isActive }) =>
@@ -31,14 +27,11 @@ function AuthorProfile() {
         >
           Write Article
         </NavLink>
-
       </div>
 
       <div className={divider}></div>
 
-      {/* Nested route content */}
       <Outlet />
-
     </div>
   );
 }

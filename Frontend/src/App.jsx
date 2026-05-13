@@ -17,7 +17,6 @@ function App() {
       path: "/",
       element: <RootLayout />,
       children: [
-        ,
         {
           path: "",
           element: <Home />,
@@ -57,9 +56,9 @@ function App() {
           element: <ArticleByID />,
         },
         {
-          path:"edit-article",
-          element:<EditArticle />
-        }
+          path: "edit-article",
+          element: <EditArticle />,
+        },
       ],
     },
   ]);

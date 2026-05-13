@@ -21,16 +21,15 @@ function Header() {
     navigate("/login");
   };
 
+  const writeArticlePath = user?.role === "AUTHOR" ? "/author-profile/write-article" : "/login";
+
   // decide profile route based on role
   const getProfilePath = () => {
     if (!user) return "/";
 
-    console.log("current user", user);
     switch (user.role) {
       case "AUTHOR":
         return "/author-profile";
-      case "ADMIN":
-        return "/admin-profile";
       default:
         return "/user-profile";
     }
@@ -49,6 +48,15 @@ function Header() {
           <li>
             <NavLink to="/" end className={({ isActive }) => (isActive ? navLinkActiveClass : navLinkClass)}>
               Home
+            </NavLink>
+          </li>
+
+          <li>
+            <NavLink
+              to={writeArticlePath}
+              className={({ isActive }) => (isActive ? navLinkActiveClass : navLinkClass)}
+            >
+              Write Article
             </NavLink>
           </li>
 

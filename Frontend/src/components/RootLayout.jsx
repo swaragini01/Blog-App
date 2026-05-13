@@ -3,19 +3,20 @@ import Footer from "./Footer";
 import { Outlet } from "react-router";
 import { useEffect } from "react";
 import { useAuth } from "../stores/authStore";
+import { pageShell } from "../styles/common";
 
 function RootLayout() {
   const checkAuth = useAuth((state) => state.checkAuth);
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
   return (
-    <div>
+    <div className={pageShell}>
       <Header />
-      <div className="min-h-screen mx-4 sm:mx-36">
+      <main className="min-h-screen">
         <Outlet />
-      </div>
+      </main>
       <Footer />
     </div>
   );

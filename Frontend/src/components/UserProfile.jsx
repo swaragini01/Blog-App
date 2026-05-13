@@ -1,6 +1,4 @@
-import { useAuth } from "../stores/authStore";
 import { useNavigate } from "react-router";
-import { toast } from "react-hot-toast";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -8,15 +6,18 @@ import {
   articleGrid,
   articleCardClass,
   articleTitle,
-  articleBody,
+  articleExcerpt,
   ghostBtn,
   loadingClass,
   errorClass,
   timestampClass,
+  pageWrapper,
+  pageTitleClass,
+  bodyText,
+  emptyStateClass,
 } from "../styles/common.js";
 
 function UserProfile() {
-  const logout = useAuth((state) => state.logout);
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -31,7 +32,7 @@ function UserProfile() {
 
         setArticles(res.data.payload);
       } catch (err) {
-        setError(err.response?.data?.error || "Something went wrong");
+        setError(err.response?.data?.error || err.response?.data?.message || "Something went wrong");
       } finally {
         setLoading(false);
       }
@@ -40,19 +41,12 @@ function UserProfile() {
     getArticles();
   }, []);
 
-  // convert UTC → IST
   const formatDateIST = (date) => {
     return new Date(date).toLocaleString("en-IN", {
       timeZone: "Asia/Kolkata",
       dateStyle: "medium",
       timeStyle: "short",
     });
-  };
-
-  const onLogout = async () => {
-    await logout();
-    toast.success("Logged out successfully");
-    navigate("/login");
   };
 
   const navigateToArticleByID = (articleObj) => {
@@ -66,36 +60,39 @@ function UserProfile() {
   }
 
   return (
-    <div>
-      {error && <p className={errorClass}>{error}</p>}
-
-      <div className="flex justify-end mb-6 mt-3">
-        <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={onLogout}>
-          Logout
-        </button>
+    <div className={pageWrapper}>
+      <div className="mb-6">
+        <h1 className={pageTitleClass}>Latest Articles</h1>
+        <p className={`${bodyText} mt-2`}>Read articles from authors and add your comments.</p>
       </div>
 
-      <div className={articleGrid}>
-        {articles.map((articleObj) => (
-          <div className={articleCardClass} key={articleObj._id}>
-            <div className="flex flex-col h-full">
-              {/* Top Content */}
-              <div>
+      {error && <p className={errorClass}>{error}</p>}
+
+      {articles.length === 0 ? (
+        <div className={emptyStateClass}>No articles are available right now.</div>
+      ) : (
+        <div className={articleGrid}>
+          {articles.map((articleObj) => (
+            <div className={articleCardClass} key={articleObj._id}>
+              <div className="flex flex-col gap-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#0f6b68]">
+                  {articleObj.category}
+                </p>
+
                 <p className={articleTitle}>{articleObj.title}</p>
 
-                <p>{articleObj.content.slice(0, 20)}...</p>
+                <p className={articleExcerpt}>{articleObj.content.slice(0, 120)}...</p>
 
                 <p className={timestampClass}>{formatDateIST(articleObj.createdAt)}</p>
               </div>
 
-              {/* Button at bottom */}
               <button className={`${ghostBtn} mt-auto pt-4`} onClick={() => navigateToArticleByID(articleObj)}>
-                Read Article →
+                Read Article
               </button>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

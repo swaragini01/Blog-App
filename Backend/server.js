@@ -28,7 +28,7 @@ app.use("/common-api", commonRouter);
 //connect to db
 const connectDB = async () => {
   try {
-    await connect(process.env.DB_URL);
+    await connect(process.env.MONGO_URI);
     console.log("DB connection success");
 
     //start http server
