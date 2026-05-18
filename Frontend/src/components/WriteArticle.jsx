@@ -17,6 +17,9 @@ import {
 } from "../styles/common";
 import { useAuth } from "../stores/authStore";
 
+// Grab the base URL dynamically from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 function WriteArticle() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -41,8 +44,9 @@ function WriteArticle() {
 
     articleObj.author = currentUserId;
     try {
+      // Dynamic URL update using the base environment variable
       await axios.post(
-        "http://localhost:4000/author-api/articles",
+        `${API_BASE_URL}/author-api/articles`,
         articleObj,
         { withCredentials: true }
       );

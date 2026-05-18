@@ -5,8 +5,10 @@ import Login from "./components/Login";
 import Home from "./components/Home";
 import UserProfile from "./components/UserProfile";
 import AuthorProfile from "./components/AuthorProfile";
+import AuthorProfileHome from "./components/AuthorProfileHome";
 import ArticleByID from "./components/ArticleByID";
 import AuthorArticles from "./components/AuthorArticles";
+import BrowseArticles from "./components/BrowseArticles";
 import WriteArticle from "./components/WriteArticle";
 import { Toaster } from "react-hot-toast";
 import EditArticle from "./components/EditArticleForm";
@@ -30,8 +32,16 @@ function App() {
           element: <Login />,
         },
         {
+          path: "profile",
+          element: <UserProfile />,
+        },
+        {
           path: "user-profile",
           element: <UserProfile />,
+        },
+        {
+          path: "articles",
+          element: <BrowseArticles />,
         },
         {
           path: "author-profile",
@@ -39,7 +49,7 @@ function App() {
           children: [
             {
               index: true,
-              element: <AuthorArticles />,
+              element: <AuthorProfileHome />,
             },
             {
               path: "articles",

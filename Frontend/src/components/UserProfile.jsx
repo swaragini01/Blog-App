@@ -1,98 +1,51 @@
-import { useNavigate } from "react-router";
-import axios from "axios";
-import { useEffect, useState } from "react";
-
-import {
-  articleGrid,
-  articleCardClass,
-  articleTitle,
-  articleExcerpt,
-  ghostBtn,
-  loadingClass,
-  errorClass,
-  timestampClass,
-  pageWrapper,
-  pageTitleClass,
-  bodyText,
-  emptyStateClass,
-} from "../styles/common.js";
+import { useAuth } from "../stores/authStore";
+import { Link } from "react-router";
+import { bodyText, pageTitleClass, pageWrapper, panelClass, primaryBtn, secondaryBtn } from "../styles/common.js";
 
 function UserProfile() {
-  const navigate = useNavigate();
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [articles, setArticles] = useState([]);
-
-  useEffect(() => {
-    const getArticles = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get("http://localhost:4000/user-api/articles", { withCredentials: true });
-
-        setArticles(res.data.payload);
-      } catch (err) {
-        setError(err.response?.data?.error || err.response?.data?.message || "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getArticles();
-  }, []);
-
-  const formatDateIST = (date) => {
-    return new Date(date).toLocaleString("en-IN", {
-      timeZone: "Asia/Kolkata",
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-  };
-
-  const navigateToArticleByID = (articleObj) => {
-    navigate(`/article/${articleObj._id}`, {
-      state: articleObj,
-    });
-  };
-
-  if (loading) {
-    return <p className={loadingClass}>Loading articles...</p>;
-  }
+  const user = useAuth((state) => state.currentUser);
+  const displayName = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.email || "User";
+  const isAuthor = user?.role === "AUTHOR";
+  const isReader = user?.role === "USER";
 
   return (
     <div className={pageWrapper}>
-      <div className="mb-6">
-        <h1 className={pageTitleClass}>Latest Articles</h1>
-        <p className={`${bodyText} mt-2`}>Read articles from authors and add your comments.</p>
-      </div>
+      <section className={`${panelClass} p-6 shadow-sm sm:p-8`}>
+        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#0f6b68]">Profile</p>
+        <h1 className={pageTitleClass}>Welcome, {displayName}</h1>
+        <p className={`${bodyText} mt-2`}>Your account details are shown below.</p>
 
-      {error && <p className={errorClass}>{error}</p>}
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-md bg-[#f7f8fb] p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6f7a8e]">Role</p>
+            <p className="mt-1 text-lg font-semibold text-[#172033]">{user?.role || "USER"}</p>
+          </div>
 
-      {articles.length === 0 ? (
-        <div className={emptyStateClass}>No articles are available right now.</div>
-      ) : (
-        <div className={articleGrid}>
-          {articles.map((articleObj) => (
-            <div className={articleCardClass} key={articleObj._id}>
-              <div className="flex flex-col gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#0f6b68]">
-                  {articleObj.category}
-                </p>
-
-                <p className={articleTitle}>{articleObj.title}</p>
-
-                <p className={articleExcerpt}>{articleObj.content.slice(0, 120)}...</p>
-
-                <p className={timestampClass}>{formatDateIST(articleObj.createdAt)}</p>
-              </div>
-
-              <button className={`${ghostBtn} mt-auto pt-4`} onClick={() => navigateToArticleByID(articleObj)}>
-                Read Article
-              </button>
-            </div>
-          ))}
+          <div className="rounded-md bg-[#f7f8fb] p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6f7a8e]">Email</p>
+            <p className="mt-1 break-words text-lg font-semibold text-[#172033]">{user?.email || "Not available"}</p>
+          </div>
         </div>
-      )}
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          {isAuthor && (
+            <>
+              <Link to="/author-profile/write-article" className={primaryBtn}>
+                Write Article
+              </Link>
+              <Link to="/author-profile/articles" className={secondaryBtn}>
+                My Articles
+              </Link>
+            </>
+          )}
+
+          {isReader && (
+            <Link to="/articles" className={primaryBtn}>
+              Browse Articles
+            </Link>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

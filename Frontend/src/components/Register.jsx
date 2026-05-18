@@ -17,6 +17,9 @@ import { NavLink, useNavigate } from "react-router";
 import { useState } from "react";
 import axios from "axios";
 
+// Grab the base URL dynamically from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 function Register() {
   const {
     register,
@@ -33,14 +36,26 @@ function Register() {
 
     try {
       const { role, ...userObj } = newUser;
+      if (!userObj.profileImageUrl?.trim()) {
+        delete userObj.profileImageUrl;
+      }
+
       const endpoint = role === "author" ? "author-api" : "user-api";
-      const resObj = await axios.post(`http://localhost:4000/${endpoint}/users`, userObj);
+      
+      // Dynamic URL update using the base environment variable
+      const resObj = await axios.post(`${API_BASE_URL}/${endpoint}/users`, userObj);
 
       if (resObj.status === 201) {
         navigate("/login");
       }
     } catch (err) {
-      setError(err.response?.data?.error || err.response?.data?.message || "Registration failed");
+      const details = err.response?.data?.details;
+      const serverMessage = err.response?.data?.message || err.response?.data?.error;
+      const networkMessage = err.request
+        ? "Registration failed. Please make sure the backend server is running on port 5000."
+        : "Registration failed";
+
+      setError(Array.isArray(details) ? details.join(", ") : serverMessage || networkMessage);
     } finally {
       setLoading(false);
     }

@@ -24,6 +24,9 @@ import {
   errorClass,
 } from "../styles/common.js";
 
+// Grab the base URL dynamically from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 function ArticleByID() {
   const { id } = useParams();
   const location = useLocation();
@@ -38,6 +41,8 @@ function ArticleByID() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const authorId = article?.author?._id || article?.author;
+  const isOwnArticle = user?.role === "AUTHOR" && authorId === userId;
 
   useEffect(() => {
     if (article) return;
@@ -46,15 +51,9 @@ function ArticleByID() {
       setLoading(true);
 
       try {
-        const res = await axios.get("http://localhost:4000/user-api/articles", { withCredentials: true });
-        const selectedArticle = res.data.payload?.find((item) => item._id === id);
-
-        if (!selectedArticle) {
-          setError("Article not found");
-          return;
-        }
-
-        setArticle(selectedArticle);
+        // Dynamic URL update
+        const res = await axios.get(`${API_BASE_URL}/common-api/articles/${id}`, { withCredentials: true });
+        setArticle(res.data.payload);
       } catch (err) {
         setError(err.response?.data?.error || err.response?.data?.message || "Failed to load article");
       } finally {
@@ -81,13 +80,14 @@ function ArticleByID() {
     setError(null);
 
     try {
+      // Dynamic URL update
       await axios.patch(
-        `http://localhost:4000/author-api/articles/${id}/status`,
+        `${API_BASE_URL}/author-api/articles/${id}/status`,
         { isArticleActive: false },
         { withCredentials: true },
       );
 
-      navigate("/author-profile");
+      navigate("/author-profile/articles");
     } catch (err) {
       setError(err.response?.data?.error || err.response?.data?.message || "Failed to delete article");
     } finally {
@@ -108,8 +108,9 @@ function ArticleByID() {
     setError(null);
 
     try {
+      // Dynamic URL update
       const res = await axios.put(
-        "http://localhost:4000/user-api/articles",
+        `${API_BASE_URL}/user-api/articles`,
         { user: userId, articleId: id, comment: cleanComment },
         { withCredentials: true },
       );
@@ -145,7 +146,7 @@ function ArticleByID() {
 
       <div className={articleContent}>{article.content}</div>
 
-      {user?.role === "AUTHOR" && (
+      {isOwnArticle && (
         <div className={articleActions}>
           <button className={editBtn} onClick={() => editArticle(article)}>
             Edit

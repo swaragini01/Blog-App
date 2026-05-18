@@ -16,6 +16,9 @@ import {
   pageWrapper,
 } from "../styles/common";
 
+// Grab the base URL dynamically from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 function EditArticle() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,8 +51,9 @@ function EditArticle() {
     setSubmitError(null);
 
     try {
+      // Dynamic URL update using the base environment variable
       const res = await axios.put(
-        "http://localhost:4000/author-api/articles",
+        `${API_BASE_URL}/author-api/articles`,
         { articleId: article._id, ...data },
         { withCredentials: true },
       );

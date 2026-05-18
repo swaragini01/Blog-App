@@ -5,10 +5,10 @@ import { pageWrapper, pageTitleClass, bodyText, primaryBtn, secondaryBtn, cardCl
 function Home() {
   const isAuthenticated = useAuth((state) => state.isAuthenticated);
   const user = useAuth((state) => state.currentUser);
-  const profilePath = user?.role === "AUTHOR" ? "/author-profile" : "/user-profile";
   const isAuthor = user?.role === "AUTHOR";
   const isReader = user?.role === "USER";
   const writeArticlePath = isAuthor ? "/author-profile/write-article" : "/login";
+  const articlesPath = isAuthor ? "/author-profile/articles" : isReader ? "/articles" : "/login";
   const workflowCards = [
     {
       title: "Write articles",
@@ -19,13 +19,13 @@ function Home() {
     {
       title: "Browse posts",
       text: "Read active articles in a neat card layout with clear dates and categories.",
-      to: isReader ? "/user-profile" : "/login",
-      action: isReader ? "Browse articles" : "Sign in to browse",
+      to: articlesPath,
+      action: isAuthenticated ? "Browse articles" : "Sign in to browse",
     },
     {
       title: "Comments",
       text: "Add comments from the article page without leaving the reading flow.",
-      to: isReader ? "/user-profile" : "/login",
+      to: isReader ? "/articles" : "/login",
       action: isReader ? "Open articles" : "Sign in to comment",
     },
   ];
@@ -45,7 +45,7 @@ function Home() {
             </Link>
 
             {isAuthenticated ? (
-              <Link to={profilePath} className={primaryBtn}>
+              <Link to="/profile" className={primaryBtn}>
                 Go to profile
               </Link>
             ) : (

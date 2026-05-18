@@ -35,14 +35,8 @@ function Login() {
 
   useEffect(() => {
     if (isAuthenticated && currentUser) {
-      if (currentUser.role === "USER") {
-        toast.success("Logged in successfully");
-        navigate("/user-profile");
-      }
-      if (currentUser.role === "AUTHOR") {
-        toast.success("Logged in successfully");
-        navigate("/author-profile");
-      }
+      toast.success("Logged in successfully");
+      navigate("/profile");
     }
   }, [isAuthenticated, currentUser, navigate]);
 

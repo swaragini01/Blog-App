@@ -12,12 +12,27 @@ config(); //process.env
 
 //Create express application
 const app = exp();
-//use cors middleware
-app.use(cors({ origin: ["http://localhost:5173"],credentials:true }));
+
+// --- 1. UPDATED CORS MIDDLEWARE ---
+// Allows both your local development environment and your production Vercel frontend
+app.use(cors({ 
+  origin: [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://blog-app-ashen-one-56.vercel.app",
+  ],
+  credentials: true 
+}));
+
 //add body parser middleware
 app.use(exp.json());
 //add cookie parser middleware
 app.use(cookieParser());
+
+//quick check route to confirm backend is running
+app.get("/health", (req, res) => {
+  res.status(200).json({ message: "Backend is running" });
+});
 
 //connect APIs
 app.use("/user-api", userRoute);
@@ -31,8 +46,11 @@ const connectDB = async () => {
     await connect(process.env.MONGO_URI);
     console.log("DB connection success");
 
-    //start http server
-    app.listen(process.env.PORT, () => console.log(`server started on port ${process.env.PORT}`));
+    // --- 2. UPDATED PORT LISTENER ---
+    // Render dynamically injects process.env.PORT, fallback to 5000 locally
+    const PORT = process.env.PORT || process.env.port || 5000;
+    app.listen(PORT, () => console.log(`server started on port ${PORT}`));
+    
   } catch (err) {
     console.log("Err in DB connection", err);
   }

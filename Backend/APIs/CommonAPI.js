@@ -1,24 +1,29 @@
 import exp from "express";
 import { authenticate } from "../services/authService.js";
 import { UserTypeModel } from "../models/UserModel.js";
+import { ArticleModel } from "../models/ArticleModel.js";
 import bcrypt from "bcryptjs";
 import { verifyToken } from "../middlewares/verifyToken.js";
 export const commonRouter = exp.Router();
 
 //login
-commonRouter.post("/login", async (req, res) => {
-  //get user cred object
-  let userCred = req.body;
-  //call authenticate service
-  let { token, user } = await authenticate(userCred);
-  //save tokan as httpOnly cookie
-  res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
-  });
-  //send res
-  res.status(200).json({ message: "login success", payload: user });
+commonRouter.post("/login", async (req, res, next) => {
+  try {
+    //get user cred object
+    let userCred = req.body;
+    //call authenticate service
+    let { token, user } = await authenticate(userCred);
+    //save token as httpOnly cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+    //send res
+    res.status(200).json({ message: "login success", payload: user });
+  } catch (err) {
+    next(err);
+  }
 });
 
 //logout for User, Author and Admin
@@ -26,8 +31,8 @@ commonRouter.get("/logout", (req, res) => {
   // Clear the cookie named 'token'
   res.clearCookie("token", {
     httpOnly: true, // Must match original  settings
-    secure: false, // Must match original  settings
-    sameSite: "lax", // Must match original  settings
+    secure: process.env.NODE_ENV === "production", // Must match original settings
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Must match original settings
   });
 
   res.status(200).json({ message: "Logged out successfully" });
@@ -61,9 +66,31 @@ commonRouter.put("/change-password", async (req, res) => {
 });
 
 //Page refresh
-commonRouter.get("/check-auth", verifyToken("USER","AUTHOR","ADMIN"), (req, res) => {
+commonRouter.get("/check-auth", verifyToken("USER", "AUTHOR", "ADMIN"), async (req, res) => {
+  const user = await UserTypeModel.findById(req.user.userId).select("-password");
+
+  if (!user || user.isActive === false) {
+    return res.status(401).json({ message: "Account is not active. Please login again" });
+  }
+
   res.status(200).json({
     message: "authenticated",
-    payload: req.user
+    payload: user,
   });
+});
+
+//Read one active article for logged in users/authors/admins
+commonRouter.get("/articles/:id", verifyToken("USER", "AUTHOR", "ADMIN"), async (req, res) => {
+  const article = await ArticleModel.findOne({
+    _id: req.params.id,
+    isArticleActive: true,
+  })
+    .populate("author", "firstName lastName email")
+    .populate("comments.user", "firstName lastName email");
+
+  if (!article) {
+    return res.status(404).json({ message: "Article not found" });
+  }
+
+  res.status(200).json({ message: "article", payload: article });
 });

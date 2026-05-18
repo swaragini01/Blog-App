@@ -16,6 +16,9 @@ import {
   bodyText,
 } from "../styles/common";
 
+// Grab the base URL dynamically from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 function AuthorArticles() {
   const navigate = useNavigate();
   const user = useAuth((state) => state.currentUser);
@@ -32,7 +35,8 @@ function AuthorArticles() {
       setLoading(true);
 
       try {
-        const res = await axios.get(`http://localhost:4000/author-api/articles/${authorId}`, { withCredentials: true });
+        // Dynamic URL update using the base environment variable
+        const res = await axios.get(`${API_BASE_URL}/author-api/articles/${authorId}`, { withCredentials: true });
 
         setArticles(res.data.payload.filter((article) => article.isArticleActive !== false));
       } catch (err) {
