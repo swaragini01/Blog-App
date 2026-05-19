@@ -20,7 +20,7 @@ const allowedOrigins = [
   "http://127.0.0.1:5173",
   "https://blog-app-ashen-one-56.vercel.app",
   "https://blog-app-new-pi.vercel.app", 
-  "https://blog-app-6vxketqrl-23eg112d59-1850s-projects.vercel.app" // Your current active Vercel preview URL
+  "https://blog-app-6vxketqrl-23eg112d59-1850s-projects.vercel.app"
 ];
 
 // If you deploy your frontend to Render later, add its URL to this environment variable
@@ -28,10 +28,19 @@ if (process.env.FRONTEND_RENDER_URL) {
   allowedOrigins.push(process.env.FRONTEND_RENDER_URL);
 }
 
+// FIXED: Pass the dynamic validation function using the allowedOrigins array
 app.use(cors({ 
-  origin: [
-      "https://blog-app-new-pi.vercel.app",
-    ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, postman, or curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    } else {
+      const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+      return callback(new Error(msg), false);
+    }
+  },
   credentials: true 
 }));
 
@@ -42,7 +51,6 @@ app.use(exp.json());
 app.use(cookieParser());
 
 // --- 2. ROOT AND HEALTH CHECK ROUTES ---
-// Fixed: This prevents the "/" is invalid path error when visiting http://localhost:5000/
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Welcome to the Blog App API. Server is running perfectly!" });
 });
