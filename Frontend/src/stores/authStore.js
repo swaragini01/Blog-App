@@ -2,8 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 
 // Grab the base URL dynamically from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-
+const API_BASE_URL = "https://your-blog-backend.onrender.com";
 export const useAuth = create((set) => ({
   currentUser: null,
   loading: false,
