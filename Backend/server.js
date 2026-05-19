@@ -29,7 +29,7 @@ if (process.env.FRONTEND_RENDER_URL) {
 }
 
 app.use(cors({ 
-  origin: allowedOrigins,
+  origin: "https://blog-app-new-pi.vercel.app",
   credentials: true 
 }));
 
