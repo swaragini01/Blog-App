@@ -17,7 +17,7 @@ import {
   emptyStateClass,
 } from "../styles/common.js";
 
-const API_BASE_URL = "https://your-blog-backend.onrender.com";
+const API_BASE_URL = "https://blog-app-new-9bp9.onrender.com";
 
 function BrowseArticles() {
   const navigate = useNavigate();

@@ -3,7 +3,7 @@ import axios from "axios";
 import { useAuth } from "../stores/authStore";
 import { bodyText, errorClass, loadingClass, pageTitleClass, panelClass } from "../styles/common.js";
 
-const API_BASE_URL = "https://your-blog-backend.onrender.com";
+const API_BASE_URL = "https://blog-app-new-9bp9.onrender.com";
 
 function AuthorProfileHome() {
   const user = useAuth((state) => state.currentUser);

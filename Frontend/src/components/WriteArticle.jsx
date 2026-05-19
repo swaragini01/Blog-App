@@ -18,7 +18,7 @@ import {
 import { useAuth } from "../stores/authStore";
 
 // Grab the base URL dynamically from environment variables
-const API_BASE_URL = "https://your-blog-backend.onrender.com";
+const API_BASE_URL = "https://blog-app-new-9bp9.onrender.com";
 
 function WriteArticle() {
   const navigate = useNavigate();

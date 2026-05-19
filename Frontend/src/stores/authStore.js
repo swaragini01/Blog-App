@@ -2,7 +2,7 @@ import { create } from "zustand";
 import axios from "axios";
 
 // Grab the base URL dynamically from environment variables
-const API_BASE_URL = "https://your-blog-backend.onrender.com";
+const API_BASE_URL = "https://blog-app-new-9bp9.onrender.com";
 export const useAuth = create((set) => ({
   currentUser: null,
   loading: false,
