@@ -24,8 +24,7 @@ import {
   errorClass,
 } from "../styles/common.js";
 
-// Grab the base URL dynamically from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = "https://your-blog-backend.onrender.com";
 
 function ArticleByID() {
   const { id } = useParams();
@@ -41,6 +40,7 @@ function ArticleByID() {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
   const authorId = article?.author?._id || article?.author;
   const isOwnArticle = user?.role === "AUTHOR" && authorId === userId;
 
@@ -51,11 +51,18 @@ function ArticleByID() {
       setLoading(true);
 
       try {
-        // Dynamic URL update
-        const res = await axios.get(`${API_BASE_URL}/common-api/articles/${id}`, { withCredentials: true });
+        const res = await axios.get(
+          `${API_BASE_URL}/common-api/articles/${id}`,
+          { withCredentials: true }
+        );
+
         setArticle(res.data.payload);
       } catch (err) {
-        setError(err.response?.data?.error || err.response?.data?.message || "Failed to load article");
+        setError(
+          err.response?.data?.error ||
+            err.response?.data?.message ||
+            "Failed to load article"
+        );
       } finally {
         setLoading(false);
       }
@@ -77,19 +84,21 @@ function ArticleByID() {
     if (!confirmed) return;
 
     setDeleteLoading(true);
-    setError(null);
 
     try {
-      // Dynamic URL update
       await axios.patch(
         `${API_BASE_URL}/author-api/articles/${id}/status`,
         { isArticleActive: false },
-        { withCredentials: true },
+        { withCredentials: true }
       );
 
       navigate("/author-profile/articles");
     } catch (err) {
-      setError(err.response?.data?.error || err.response?.data?.message || "Failed to delete article");
+      setError(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Failed to delete article"
+      );
     } finally {
       setDeleteLoading(false);
     }
@@ -101,31 +110,41 @@ function ArticleByID() {
 
   const addComment = async (event) => {
     event.preventDefault();
+
     const cleanComment = comment.trim();
+
     if (!cleanComment || !userId) return;
 
     setCommentLoading(true);
-    setError(null);
 
     try {
-      // Dynamic URL update
       const res = await axios.put(
         `${API_BASE_URL}/user-api/articles`,
-        { user: userId, articleId: id, comment: cleanComment },
-        { withCredentials: true },
+        {
+          user: userId,
+          articleId: id,
+          comment: cleanComment,
+        },
+        { withCredentials: true }
       );
 
       setArticle(res.data.payload);
       setComment("");
     } catch (err) {
-      setError(err.response?.data?.error || err.response?.data?.message || "Failed to add comment");
+      setError(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Failed to add comment"
+      );
     } finally {
       setCommentLoading(false);
     }
   };
 
   if (loading) return <p className={loadingClass}>Loading article...</p>;
+
   if (error && !article) return <p className={errorClass}>{error}</p>;
+
   if (!article) return null;
 
   return (
@@ -136,7 +155,9 @@ function ArticleByID() {
         <h1 className={articleMainTitle}>{article.title}</h1>
 
         <div className={articleAuthorRow}>
-          <div className={authorInfo}>By {article.author?.firstName || "Author"}</div>
+          <div className={authorInfo}>
+            By {article.author?.firstName || "Author"}
+          </div>
 
           <div>{formatDate(article.createdAt)}</div>
         </div>
@@ -148,11 +169,18 @@ function ArticleByID() {
 
       {isOwnArticle && (
         <div className={articleActions}>
-          <button className={editBtn} onClick={() => editArticle(article)}>
+          <button
+            className={editBtn}
+            onClick={() => editArticle(article)}
+          >
             Edit
           </button>
 
-          <button className={deleteBtn} onClick={deleteArticle} disabled={deleteLoading}>
+          <button
+            className={deleteBtn}
+            onClick={deleteArticle}
+            disabled={deleteLoading}
+          >
             {deleteLoading ? "Deleting..." : "Delete"}
           </button>
         </div>
@@ -160,14 +188,20 @@ function ArticleByID() {
 
       <section className="mt-10 rounded-lg border border-[#dfe5ee] bg-white p-5">
         <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-[#172033]">Comments</h2>
-          <span className="text-sm text-[#6f7a8e]">{article.comments?.length || 0}</span>
+          <h2 className="text-lg font-semibold text-[#172033]">
+            Comments
+          </h2>
+
+          <span className="text-sm text-[#6f7a8e]">
+            {article.comments?.length || 0}
+          </span>
         </div>
 
         {user?.role === "USER" && (
           <form onSubmit={addComment} className="mb-6">
             <div className={formGroup}>
               <label className={labelClass}>Write a comment</label>
+
               <textarea
                 rows="3"
                 className={inputClass}
@@ -176,7 +210,12 @@ function ArticleByID() {
                 placeholder="Share your thoughts..."
               />
             </div>
-            <button className={primaryBtn} type="submit" disabled={commentLoading || !comment.trim()}>
+
+            <button
+              className={primaryBtn}
+              type="submit"
+              disabled={commentLoading || !comment.trim()}
+            >
               {commentLoading ? "Posting..." : "Post comment"}
             </button>
           </form>
@@ -185,8 +224,13 @@ function ArticleByID() {
         {article.comments?.length ? (
           <div className="space-y-3">
             {article.comments.map((commentObj, index) => (
-              <div key={commentObj._id || index} className="rounded-md bg-[#f7f8fb] p-4">
-                <p className="text-sm leading-6 text-[#263247]">{commentObj.comment}</p>
+              <div
+                key={commentObj._id || index}
+                className="rounded-md bg-[#f7f8fb] p-4"
+              >
+                <p className="text-sm leading-6 text-[#263247]">
+                  {commentObj.comment}
+                </p>
               </div>
             ))}
           </div>
@@ -195,7 +239,9 @@ function ArticleByID() {
         )}
       </section>
 
-      <div className={articleFooter}>Last updated: {formatDate(article.updatedAt)}</div>
+      <div className={articleFooter}>
+        Last updated: {formatDate(article.updatedAt)}
+      </div>
     </div>
   );
 }
