@@ -29,7 +29,10 @@ if (process.env.FRONTEND_RENDER_URL) {
 }
 
 app.use(cors({ 
-  origin: "https://blog-app-new-pi.vercel.app",
+  origin: [
+      "https://blog-app-ashen-one-56.vercel.app",
+      "https://your-blog-iqdz.vercel.app",
+    ],
   credentials: true 
 }));
 
